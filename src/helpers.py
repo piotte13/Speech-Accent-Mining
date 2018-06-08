@@ -21,6 +21,14 @@ def write_to_csv(path, data):
         writer = csv.writer(f)
         writer.writerows(data)
 
+def load_dataset():
+    data = open_file_read('../accents_data/dataset.csv')
+    dataset = []
+    for index, row in enumerate(data):
+        if row and index > 0:
+            dataset.append(list(map(float, row)))
+    return dataset
+
 def load_all_wav_into_csv():
 
     metadata = open_file_read('../accents_data/speakers_all.csv')
