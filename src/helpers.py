@@ -67,11 +67,11 @@ def create_dataset():
             count+=1
     filename_out = os.path.join(dirname, '../accents_data/dataset.csv')
     for i in range(nbColumns):
-        labels.append("average"+i+1)
-        labels.append("mean"+i+1)
-        labels.append("std"+i+1)
-        labels.append("var"+i+1)
-        labels.append("skew"+i+1)
+        labels.append("average"+str(i+1))
+        labels.append("mean"+str(i+1))
+        labels.append("std"+str(i+1))
+        labels.append("var"+str(i+1))
+        labels.append("skew"+str(i+1))
 
     dataset.insert(0,labels)
     with open(filename_out, "w") as f:
