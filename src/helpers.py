@@ -8,13 +8,22 @@ import csv
 import numpy as np
 
 NUMBER_OF_FILES = 2138
+dirname = os.path.dirname(__file__)
+
+def open_file_read(path):
+    filename_meta = os.path.join(dirname, path)
+    f = open(filename_meta, 'r')
+    return csv.reader(f, delimiter=',', quotechar='"')
+
+def write_to_csv(path, data):
+    filename_out = os.path.join(dirname, path)
+    with open(filename_out, "w") as f:
+        writer = csv.writer(f)
+        writer.writerows(data)
 
 def load_all_wav_into_csv():
-    dirname = os.path.dirname(__file__)
 
-    filename_meta = os.path.join(dirname, '../accents_data/speakers_all.csv')
-    f = open(filename_meta,'r')
-    metadata = csv.reader(f, delimiter=',', quotechar='"')
+    metadata = open_file_read('../accents_data/speakers_all.csv')
     count = 0
     for file in metadata:
         if file[8] == "FALSE":
@@ -26,34 +35,34 @@ def load_all_wav_into_csv():
             d_mfcc_feat = delta(mfcc_feat, 2)
             fbank_feat = logfbank(sig,rate, nfft=1200)
 
-            filename_out = os.path.join(dirname, '../accents_data/recordings_csv/' + file[3] + '.csv')
-            with open(filename_out, "w") as f:
-                writer = csv.writer(f)
-                writer.writerows(fbank_feat)
+            write_to_csv('../accents_data/recordings_csv/' + file[3] + '.csv', fbank_feat)
+
             progress(count, NUMBER_OF_FILES, "Generating MFCCs")
 
 def create_dataset():
-    dirname = os.path.dirname(__file__)
 
-    filename_meta = os.path.join(dirname, '../accents_data/speakers_all.csv')
-    f = open(filename_meta, 'r')
-    metadata = csv.reader(f, delimiter=',', quotechar='"')
+    metadata = open_file_read('../accents_data/speakers_all.csv')
     count = 0
     dataset = []
     labels = []
     nbColumns = 0
     for file in metadata:
+        #Check if file is not missing
         if file[8] == "FALSE":
-            filename_csv = os.path.join(dirname, '../accents_data/recordings_csv/' + file[3] + '.csv')
-            f_csv = open(filename_csv, 'r')
-            data = csv.reader(f_csv, delimiter=',', quotechar='"')
+            #Open corresponding file
+            data = open_file_read('../accents_data/recordings_csv/' + file[3] + '.csv')
             data_in_numbers = []
             new_features = []
+
+            #Convert strings to floats
             for row in data:
                 if row:
                     data_in_numbers.append(list(map(float, row)))
+
             data_in_numbers = np.array(data_in_numbers)
             nbColumns = len(data_in_numbers[0,:])
+
+            #Calculate new features out of MFCCs
             for i in range(nbColumns):
                 new_features.append(np.average(data_in_numbers[:,i]))
                 new_features.append(np.mean(data_in_numbers[:,i]))
@@ -65,18 +74,16 @@ def create_dataset():
             dataset.append(new_features)
             progress(count, NUMBER_OF_FILES, "Building dataset")
             count+=1
-    filename_out = os.path.join(dirname, '../accents_data/dataset.csv')
+    #Create label row
     for i in range(nbColumns):
         labels.append("average"+str(i+1))
         labels.append("mean"+str(i+1))
         labels.append("std"+str(i+1))
         labels.append("var"+str(i+1))
         labels.append("skew"+str(i+1))
-
     dataset.insert(0,labels)
-    with open(filename_out, "w") as f:
-        writer = csv.writer(f)
-        writer.writerows(dataset)
+    write_to_csv('../accents_data/dataset.csv', dataset)
+
 
 def progress(count, total, status=''):
     bar_len = 60
