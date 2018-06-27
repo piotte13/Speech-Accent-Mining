@@ -26,8 +26,10 @@ def load_dataset():
     dataset = []
     for index, row in enumerate(data):
         if row and index > 0:
-            dataset.append(list(map(float, row)))
-    return dataset
+            r = list(map(float, row[:-1]))
+            r.append(row[-1])
+            dataset.append(r)
+    return np.array(dataset)
 
 def load_all_wav_into_csv():
 
@@ -77,7 +79,7 @@ def create_dataset():
                 new_features.append(np.std(data_in_numbers[:,i]))
                 new_features.append(np.var(data_in_numbers[:,i]))
                 new_features.append(stats.skew(data_in_numbers[:,i]))
-
+            new_features.append(file[4])
 
             dataset.append(new_features)
             progress(count, NUMBER_OF_FILES, "Building dataset")
