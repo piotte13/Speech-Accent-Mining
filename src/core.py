@@ -4,10 +4,14 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.datasets import make_classification
 from sklearn.model_selection import cross_val_score
 import numpy as np
+from sklearn.neural_network import MLPClassifier
 from sklearn.svm import LinearSVC
 from sklearn.datasets import make_classification
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.naive_bayes import MultinomialNB
+from sklearn import preprocessing
 
+np.random.seed(1337)  # for reproducibility
 
 def cross_validate(clf, n):
     dataset = load_dataset()
@@ -32,64 +36,74 @@ def decision_tree():
     #clf.fit(X, y)
     return clf
 
+def naive_bayes_mn():
+    X, y = get_classification()
+    clf = MultinomialNB()
+    #clf.fit(X, y)
+    MultinomialNB(alpha=1.0, class_prior=None, fit_prior=True)
+    return clf
+
+def neural_net():
+    X, y = get_classification()
+    clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(15,), random_state=1)
+    return clf
+
 def get_classification():
     dataset = load_dataset()
+    min_max_scaler = preprocessing.MinMaxScaler()
     X = dataset[:,:-1]
     y = dataset[:, -1]
+    X = min_max_scaler.fit_transform(X)
     # X, y = make_classification(n_samples=len(dataset[:, 0]), n_features=len(dataset[0, :]),
     #                            n_informative=len(dataset[0, :]) - 1, n_redundant=0,
     #                            random_state=0, shuffle=False, n_classes=214)
     return X, y
 
-from sklearn.cluster import DBSCAN
-from sklearn import metrics
+# from keras.optimizers import SGD
+# from keras.preprocessing import sequence
+# from keras.utils import np_utils
+# from keras.models import Sequential
+# from keras.layers.core import Dense, Dropout, Activation
+# from keras.layers.recurrent import LSTM
+# from sklearn.cross_validation import train_test_split
+# from sklearn.metrics import classification_report
 
+batch_size = 2
+hidden_units = 10
+nb_classes = 6
 
-def dbscan():
+def rnn():
     X, y = get_classification()
-    # #############################################################################
-    # Compute DBSCAN
-    db = DBSCAN(eps=0.3, min_samples=10).fit(X)
-    core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
-    core_samples_mask[db.core_sample_indices_] = True
-    labels = db.labels_
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.18)
+    print('Build model...')
 
-    # Number of clusters in labels, ignoring noise if present.
-    n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
+    Y_train = np_utils.to_categorical(y_train, nb_classes)
+    Y_test = np_utils.to_categorical(y_test, nb_classes)
 
-    # print('Estimated number of clusters: %d' % n_clusters_)
-    # print("Homogeneity: %0.3f" % metrics.homogeneity_score(y, labels))
-    # print("Completeness: %0.3f" % metrics.completeness_score(y, labels))
-    # print("V-measure: %0.3f" % metrics.v_measure_score(y, labels))
-    # print("Adjusted Rand Index: %0.3f"
-    #       % metrics.adjusted_rand_score(y, labels))
-    # print("Adjusted Mutual Information: %0.3f"
-    #       % metrics.adjusted_mutual_info_score(y, labels))
-    # print("Silhouette Coefficient: %0.3f"
-    #       % metrics.silhouette_score(X, labels))
+    model = Sequential()
 
-    # #############################################################################
-    # Plot result
-    import matplotlib.pyplot as plt
+    X_train = np.reshape(X_train, (int(X_train.shape[0]), 1, X_train.shape[1]))
+    X_test = np.reshape(X_test, (int(X_test.shape[0]), 1, X_test.shape[1]))
 
-    # Black removed and is used for noise instead.
-    unique_labels = set(labels)
-    colors = [plt.cm.Spectral(each)
-              for each in np.linspace(0, 1, len(unique_labels))]
-    for k, col in zip(unique_labels, colors):
-        if k == -1:
-            # Black used for noise.
-            col = [0, 0, 0, 1]
+    # batch_input_shape= (batch_size, X_train.shape[1], X_train.shape[2])
 
-        class_member_mask = (labels == k)
+    # note that it is necessary to pass in 3d batch_input_shape if stateful=True
+    model.add(LSTM(64, return_sequences=True, stateful=False,
+                   batch_input_shape=(batch_size, X_train.shape[1], X_train.shape[2])))
+    model.add(LSTM(64, return_sequences=True, stateful=False))
+    model.add(LSTM(64, stateful=False))
 
-        xy = X[class_member_mask & core_samples_mask]
-        plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=tuple(col),
-                 markeredgecolor='k', markersize=14)
+    # add dropout to control for overfitting
+    model.add(Dropout(.25))
 
-        xy = X[class_member_mask & ~core_samples_mask]
-        plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=tuple(col),
-                 markeredgecolor='k', markersize=6)
+    # squash output onto number of classes in probability space
+    model.add(Dense(nb_classes, activation='softmax'))
 
-    plt.title('Estimated number of clusters: %d' % n_clusters_)
-    plt.show()
+    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=["accuracy"])
+
+    print("Train...")
+    model.fit(X_train, Y_train, batch_size=batch_size, nb_epoch=5, validation_data=(X_test, Y_test))
+    X_test = X_test[:-1,:,:]
+    y_test = y_test[:-1]
+    y_pred = model.predict_classes(X_test, batch_size=batch_size)
+    print(classification_report(y_test, y_pred))

@@ -7,7 +7,17 @@ import os
 import csv
 import numpy as np
 
-NUMBER_OF_FILES = 2138
+#For progress bar
+NUMBER_OF_FILES = 971
+
+FILE_MISSING_IDX = 8
+FILE_NAME_IDX = 3
+FIRST_LANGUAGE_IDX = 4
+SEX_INDEX = 5
+AGE_ONSET_INDEX = 1
+ACCEPTED_LANGUAGES = ["english", "spanish", "arabic", "mandarin", "french"]
+SEX_LIST = ['male', 'female']
+
 dirname = os.path.dirname(__file__)
 
 def open_file_read(path):
@@ -32,18 +42,17 @@ def load_dataset():
     return np.array(dataset)
 
 def load_all_wav_into_csv():
-
     metadata = open_file_read('../accents_data/speakers_all.csv')
     count = 0
     for file in metadata:
-        if file[8] == "FALSE":
+        if file[FILE_MISSING_IDX] == "FALSE" and file[FIRST_LANGUAGE_IDX] in ACCEPTED_LANGUAGES:
             count+=1
-            filename_wav = os.path.join(dirname, '../accents_data/recordings_wav/' + file[3] + '.wav')
+            filename_wav = os.path.join(dirname, '../accents_data/recordings_wav/' + file[FILE_NAME_IDX] + '.wav')
 
             (rate,sig) = wav.read(filename_wav)
-            mfcc_feat = mfcc(sig,rate, nfft=1200)
+            mfcc_feat = mfcc(sig,rate, nfft=1200, nfilt=13)
             d_mfcc_feat = delta(mfcc_feat, 2)
-            fbank_feat = logfbank(sig,rate, nfft=1200)
+            fbank_feat = logfbank(sig,rate, nfft=1200, nfilt=13)
 
             write_to_csv('../accents_data/recordings_csv/' + file[3] + '.csv', fbank_feat)
 
@@ -58,9 +67,9 @@ def create_dataset():
     nbColumns = 0
     for file in metadata:
         #Check if file is not missing
-        if file[8] == "FALSE":
+        if file[FILE_MISSING_IDX] == "FALSE" and file[FIRST_LANGUAGE_IDX] in ACCEPTED_LANGUAGES :
             #Open corresponding file
-            data = open_file_read('../accents_data/recordings_csv/' + file[3] + '.csv')
+            data = open_file_read('../accents_data/recordings_csv/' + file[FILE_NAME_IDX] + '.csv')
             data_in_numbers = []
             new_features = []
 
@@ -77,9 +86,13 @@ def create_dataset():
                 new_features.append(np.average(data_in_numbers[:,i]))
                 new_features.append(np.mean(data_in_numbers[:,i]))
                 new_features.append(np.std(data_in_numbers[:,i]))
-                new_features.append(np.var(data_in_numbers[:,i]))
+                #new_features.append(np.corrcoef(data_in_numbers[:,i]))
                 new_features.append(stats.skew(data_in_numbers[:,i]))
-            new_features.append(file[4])
+            #Add correct answer at the end
+            new_features.append(ACCEPTED_LANGUAGES.index(file[FIRST_LANGUAGE_IDX]))
+            new_features.append(SEX_LIST.index(file[SEX_INDEX]))
+           # new_features.append(file[AGE_ONSET_INDEX])
+
 
             dataset.append(new_features)
             progress(count, NUMBER_OF_FILES, "Building dataset")
@@ -89,7 +102,7 @@ def create_dataset():
         labels.append("average"+str(i+1))
         labels.append("mean"+str(i+1))
         labels.append("std"+str(i+1))
-        labels.append("var"+str(i+1))
+        #labels.append("corrcoef"+str(i+1))
         labels.append("skew"+str(i+1))
     dataset.insert(0,labels)
     write_to_csv('../accents_data/dataset.csv', dataset)
