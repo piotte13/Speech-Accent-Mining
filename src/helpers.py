@@ -86,7 +86,6 @@ def create_dataset():
                 new_features.append(np.average(data_in_numbers[:,i]))
                 new_features.append(np.mean(data_in_numbers[:,i]))
                 new_features.append(np.std(data_in_numbers[:,i]))
-                #new_features.append(np.corrcoef(data_in_numbers[:,i]))
                 new_features.append(stats.skew(data_in_numbers[:,i]))
             #Add correct answer at the end
             new_features.append(ACCEPTED_LANGUAGES.index(file[FIRST_LANGUAGE_IDX]))
@@ -102,7 +101,6 @@ def create_dataset():
         labels.append("average"+str(i+1))
         labels.append("mean"+str(i+1))
         labels.append("std"+str(i+1))
-        #labels.append("corrcoef"+str(i+1))
         labels.append("skew"+str(i+1))
     dataset.insert(0,labels)
     write_to_csv('../accents_data/dataset.csv', dataset)
