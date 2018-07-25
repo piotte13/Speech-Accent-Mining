@@ -6,6 +6,9 @@ import scipy.stats as stats
 import os
 import csv
 import numpy as np
+from scipy.io.wavfile import write as wav_write
+import librosa
+
 
 #For progress bar
 NUMBER_OF_FILES = 971
@@ -16,6 +19,7 @@ FIRST_LANGUAGE_IDX = 4
 SEX_INDEX = 5
 AGE_ONSET_INDEX = 1
 ACCEPTED_LANGUAGES = ["english", "spanish", "arabic", "mandarin", "french"]
+#ACCEPTED_LANGUAGES = ["english", "spanish", "arabic"]
 SEX_LIST = ['male', 'female']
 
 dirname = os.path.dirname(__file__)
@@ -41,6 +45,21 @@ def load_dataset():
             dataset.append(r)
     return np.array(dataset)
 
+def downsample(filename, outrate=8000, write_wav = False):
+    (sig, rate) = librosa.load(filename)
+    down_sig = librosa.core.resample(np.array(sig), rate, outrate, scale=True)
+    if not write_wav:
+        return down_sig, outrate
+    if write_wav:
+        wav_write('{}_down_{}.wav'.format(filename, outrate), outrate, down_sig)
+
+
+def make_standard_length(filename, n_samps=240000):
+    down_sig, rate = downsample(filename)
+    normed_sig = librosa.util.fix_length(down_sig, n_samps)
+    normed_sig = (normed_sig - np.mean(normed_sig))/np.std(normed_sig)
+    return rate, normed_sig
+
 def load_all_wav_into_csv():
     metadata = open_file_read('../accents_data/speakers_all.csv')
     count = 0
@@ -49,7 +68,7 @@ def load_all_wav_into_csv():
             count+=1
             filename_wav = os.path.join(dirname, '../accents_data/recordings_wav/' + file[FILE_NAME_IDX] + '.wav')
 
-            (rate,sig) = wav.read(filename_wav)
+            rate,sig = make_standard_length(filename_wav)
             mfcc_feat = mfcc(sig,rate, nfft=1200, nfilt=13)
             d_mfcc_feat = delta(mfcc_feat, 2)
             fbank_feat = logfbank(sig,rate, nfft=1200, nfilt=13)
@@ -88,9 +107,9 @@ def create_dataset():
                 new_features.append(np.std(data_in_numbers[:,i]))
                 new_features.append(stats.skew(data_in_numbers[:,i]))
             #Add correct answer at the end
+            #new_features.append(SEX_LIST.index(file[SEX_INDEX]))
+            #new_features.append(file[AGE_ONSET_INDEX])
             new_features.append(ACCEPTED_LANGUAGES.index(file[FIRST_LANGUAGE_IDX]))
-            new_features.append(SEX_LIST.index(file[SEX_INDEX]))
-           # new_features.append(file[AGE_ONSET_INDEX])
 
 
             dataset.append(new_features)
