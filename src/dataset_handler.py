@@ -31,7 +31,7 @@ def open_file_read(path):
 
 def write_to_csv(path, data):
     filename_out = os.path.join(dirname, path)
-    with open(filename_out, "w") as f:
+    with open(filename_out, "w", newline='') as f:
         writer = csv.writer(f)
         writer.writerows(data)
 

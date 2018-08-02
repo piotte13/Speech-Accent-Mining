@@ -1998,7 +1998,7 @@ age,age_onset,birthplace,filename,native_language,sex,speakerid,country,file_mis
 45,21,"kao-hsiung, taiwan",taiwanese4,taiwanese,female,366,taiwan,FALSE,,,
 27,15,"tainan, taiwan",taiwanese5,taiwanese,male,481,taiwan,FALSE,,,
 33,13,"tai chung, taiwan",taiwanese6,taiwanese,female,828,taiwan,FALSE,,,
-65,35,"taipei, taiwan",taiwanese7,taiwanese,famale,1864,taiwan,FALSE,,,
+65,35,"taipei, taiwan",taiwanese7,taiwanese,female,1864,taiwan,FALSE,,,
 54,13,"tainan, taiwan",taiwanese8,taiwanese,female,2136,taiwan,FALSE,,,
 19,7,"khujand, tajikistan",tajiki1,tajiki,male,2110,tajikistan,FALSE,,,
 19,12,"khujand, tajikistan",tajiki2,tajiki,female,2175,tajikistan,FALSE,,,
