@@ -1,16 +1,12 @@
 <h1> Reconnaissance automatique de la langue maternelle d’un individu par l’analyse de son accent </h1>
-
-_Jérémie Piotte
-Département de génie logiciel et des
-technologies de l'information
-École de Technologie Supérieure
-Montréal, Canada
-jeremie.piotte.1@ens.etsmtl.ca_
-
+_Jérémie Piotte <br/>
+Département de génie logiciel et des 
+technologies de l'information <br/>
+École de Technologie Supérieure <br/>
+Montréal, Canada <br/>
+jeremie.piotte.1@ens.etsmtl.ca_ <br/>
 
 
-<h2> Table des matières </h2>
-[TOC]
 
 ## I. INTRODUCTION
 
@@ -142,7 +138,7 @@ langues sont en nombre insuffisant. Il sera donc nécessaire de
 les agréger ou encore d’éliminer les langues en nombre
 insuffisant pour l’analyse.
 
-![distribution langues](./docs/distribution langues.png)
+![distribution langues](./docs/distribution_langues.png)
 
 *Figure 2 : Répartition de la langue maternelle des différents locuteurs*
 
@@ -152,7 +148,7 @@ chaque tranche d’âge. Ce qui nous permet d’avoir une analyse
 non biaisée quant aux fréquences qui pourraient être associées
 au sexe de l’individu plutôt qu'à son type accent.
 
-![distribution age-sex](./docs/distribution age-sex.png)
+![distribution age-sex](./docs/distribution_age-sex.png)
 
 *Figure 3 : Distribution de l'âge et du sexe des locuteurs*
 
@@ -281,7 +277,7 @@ immédiate. Il sera donc nécessaire d’analyser davantage les
 statistiques de classification de chaque modèle avant d’élire le
 mieux adapté.
 
-![Precision moyenne](./docs/Precision moyenne.png)
+![Precision moyenne](./docs/Precision_moyenne.png)
 
 *Figure 4 : Précision moyenne par modèle*
 
@@ -309,7 +305,7 @@ remarquablement plus élevé que les autres pour la
 classification du français. Une combinaison pourrait être
 envisageable afin d’optimiser le score.
 
-![Statistiques de classification](./docs/Statistiques de classification.png)
+![Statistiques de classification](./docs/Statistiques_de_classification.png)
 
 *Figure 5 : Statistiques de classification pour chaque modèle*
 
@@ -344,7 +340,7 @@ a effectivement un accent Mandarin. Ce comportement nous
 remet en question concernant la corrélation entre la langue
 maternelle d’un locuteur et son type d’accent.
 
-![matrice de confusion normalisée](./docs/matrice de confusion normalisée.png)
+![matrice de confusion normalisée](./docs/matrice_de_confusion_normalisée.png)
 
 *Figure 6: Matrice de confusion normalisée*
 
@@ -379,7 +375,7 @@ précisément, la moyenne du discriminant 3 semble être
 unanimement la variable la plus intéressante pour les locuteurs
 non natifs.
 
-![Importance des variables](./docs/Importance des variables.png)
+![Importance des variables](./docs/Importance_des_variables.png)
 
 *Figure 7 : Importance de chaque variable pour chaque langue*
 
