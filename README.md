@@ -1,10 +1,10 @@
 <h1> Reconnaissance automatique de la langue maternelle d’un individu par l’analyse de son accent </h1>
-_Jérémie Piotte <br/>
+*Jérémie Piotte <br/>
 Département de génie logiciel et des 
 technologies de l'information <br/>
 École de Technologie Supérieure <br/>
 Montréal, Canada <br/>
-jeremie.piotte.1@ens.etsmtl.ca_ <br/>
+jeremie.piotte.1@ens.etsmtl.ca*<br/>
 
 
 
